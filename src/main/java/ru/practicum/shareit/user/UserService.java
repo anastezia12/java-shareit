@@ -18,16 +18,14 @@ public class UserService {
     private UserRepository userRepository;
 
     public List<UserDto> getAll() {
-        return userRepository.getAll().stream()
-                .map(UserMapper::toDto)
-                .collect(Collectors.toList());
+        return userRepository.getAll().stream().map(UserMapper::toDto).collect(Collectors.toList());
     }
 
     public UserDto getById(Long id) {
         return UserMapper.toDto(userRepository.findById(id));
     }
 
-    public UserDto add(UserDto userDto) {// add checking
+    public UserDto add(UserDto userDto) {
         User user = UserMapper.fromDto(userDto);
         if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
             throw new IllegalArgumentException("email can not be empty");
