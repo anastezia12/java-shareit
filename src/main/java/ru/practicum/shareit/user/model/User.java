@@ -4,9 +4,6 @@ import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @EqualsAndHashCode(of = "id")
 public class User {

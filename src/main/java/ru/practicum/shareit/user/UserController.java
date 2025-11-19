@@ -9,9 +9,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
@@ -30,12 +28,12 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto add(@Valid @RequestBody UserDto user) {
+    public UserDto add(@RequestBody @Valid UserDto user) {
         return userService.add(user);
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@PathVariable Long id, @Valid @RequestBody UserDto user) {
+    public UserDto update(@PathVariable Long id, @RequestBody UserDto user) {
         user.setId(id);
         return userService.update(user);
     }

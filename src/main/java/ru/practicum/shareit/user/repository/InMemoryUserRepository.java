@@ -3,15 +3,14 @@ package ru.practicum.shareit.user.repository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class InMemoryUserRepository implements UserRepository {
     private final AtomicLong lastId = new AtomicLong(0);
     private Map<Long, User> users = new HashMap();
+    private Set<String> emails = new HashSet<>();
 
     @Override
     public List<User> getAll() {
@@ -23,6 +22,7 @@ public class InMemoryUserRepository implements UserRepository {
         Long id = lastId.incrementAndGet();
         user.setId(id);
         users.put(id, user);
+        emails.add(user.getEmail());
         return users.get(id);
     }
 
@@ -33,20 +33,21 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public void deleteById(Long id) {
+        emails.remove(users.get(id).getEmail());
         users.remove(id);
     }
 
     @Override
     public User update(User user) {
+        emails.remove(users.get(user.getId()).getEmail());
         users.replace(user.getId(), user);
+        emails.add(user.getEmail());
         return users.get(user.getId());
     }
 
     @Override
     public boolean containsEmail(String email) {
-        return users.values()
-                .stream()
-                .anyMatch(x -> x.getEmail().equals(email));
+        return emails.contains(email);
     }
 
     @Override

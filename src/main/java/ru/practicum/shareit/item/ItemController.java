@@ -1,14 +1,12 @@
 package ru.practicum.shareit.item;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping("/items")
 public class ItemController {
@@ -29,7 +27,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto create(@RequestHeader(USER_Id_HEADER) Long userId,
-                          @RequestBody ItemDto itemDto) {
+                          @RequestBody @Valid ItemDto itemDto) {
         return itemService.create(userId, itemDto);
     }
 

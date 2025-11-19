@@ -1,23 +1,24 @@
 package ru.practicum.shareit.item.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequest;
 
-public class ItemMapper {
+import java.util.List;
 
-    public static ItemDto toItemDto(Item item) {
-        return new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(), item.getRequest() != null ? item.getRequest().getId() : null);
-    }
+@Mapper(componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface ItemMapper {
+    @Mapping(source = "request.id", target = "requestId")
+    ItemDto toItemDto(Item item);
 
-    public static Item fromDto(ItemDto itemDto, Long userId, ItemRequest request) {
-        Item item = new Item();
-        item.setId(itemDto.getId());
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        item.setOwner(userId);
-        item.setRequest(request);
-        return item;
-    }
+    @Mapping(source = "requestId", target = "request.id")
+    Item fromDto(ItemDto itemDto);
+
+    List<ItemDto> toItemDtoList(List<Item> items);
+
+    void updateItemFromDto(ItemDto dto, @MappingTarget Item item);
 }

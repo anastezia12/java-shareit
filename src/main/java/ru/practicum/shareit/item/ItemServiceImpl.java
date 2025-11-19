@@ -17,15 +17,17 @@ public class ItemServiceImpl implements ItemService {
     private ItemRepository itemRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ItemMapper itemMapper;
 
     @Override
     public List<ItemDto> getAllFromUser(Long id) {
-        return itemRepository.getAllFromUser(id).stream().map(ItemMapper::toItemDto).toList();
+        return itemMapper.toItemDtoList(itemRepository.getAllFromUser(id));
     }
 
     @Override
     public ItemDto findById(Long id) {
-        return ItemMapper.toItemDto(itemRepository.getById(id));
+        return itemMapper.toItemDto(itemRepository.getById(id));
     }
 
     @Override
@@ -33,18 +35,11 @@ public class ItemServiceImpl implements ItemService {
         if (!userRepository.userExists(userId)) {
             throw new UserNotFoundException("No such User with id: " + userId);
         }
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new IllegalArgumentException("Can not create item without name");
-        }
-        if (itemDto.getDescription() == null) {
-            throw new IllegalArgumentException("Can not create item without description");
-        }
-        if (itemDto.getAvailable() == null) {
-            throw new IllegalArgumentException("Can not create item without available");
-        }
-        Item item = ItemMapper.fromDto(itemDto, userId, null);
-        return ItemMapper.toItemDto(itemRepository.add(item));
+        Item item = itemMapper.fromDto(itemDto);
+        item.setOwner(userId);
+        return itemMapper.toItemDto(itemRepository.add(item));
     }
+
 
     @Override
     public ItemDto update(Long userId, ItemDto itemDto, Long itemId) {
@@ -54,19 +49,14 @@ public class ItemServiceImpl implements ItemService {
         if (!userRepository.userExists(userId)) {
             throw new UserNotFoundException("No such User with id: " + userId);
         }
-        Item item = itemRepository.getById(itemId);
-        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
-            item.setName(itemDto.getName());
-        }
 
-        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
-            item.setDescription(itemDto.getDescription());
-        }
-        if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
-        }
-        return ItemMapper.toItemDto(itemRepository.update(item));
+        Item item = itemRepository.getById(itemId);
+
+        itemMapper.updateItemFromDto(itemDto, item);
+
+        return itemMapper.toItemDto(itemRepository.update(item));
     }
+
 
     @Override
     public void delete(Long id) {
@@ -78,8 +68,6 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) {
             return List.of();
         }
-        return itemRepository.search(text).stream()
-                .map(ItemMapper::toItemDto)
-                .toList();
+        return itemMapper.toItemDtoList(itemRepository.search(text));
     }
 }

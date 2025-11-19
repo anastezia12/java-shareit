@@ -9,47 +9,45 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserMapper userMapper;
 
     public List<UserDto> getAll() {
-        return userRepository.getAll().stream().map(UserMapper::toDto).collect(Collectors.toList());
+        return userMapper.toUserDtoList(userRepository.getAll());
+        //userRepository.getAll().stream().map(UserMapper::toDto).collect(Collectors.toList());
     }
 
     public UserDto getById(Long id) {
-        return UserMapper.toDto(userRepository.findById(id));
+        return userMapper.toDto(userRepository.findById(id));
+        //UserMapper.toDto(userRepository.findById(id));
     }
 
     public UserDto add(UserDto userDto) {
-        User user = UserMapper.fromDto(userDto);
-        if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
-            throw new IllegalArgumentException("email can not be empty");
-        }
+        User user = userMapper.fromDto(userDto);
+//        if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
+//            throw new IllegalArgumentException("email can not be empty");
+//        }
         if (userRepository.containsEmail(user.getEmail())) {
             throw new IllegalArgumentException("email:" + user.getEmail() + " is already exists");
         }
 
-        return UserMapper.toDto(userRepository.add(user));
+        return userMapper.toDto(userRepository.add(user));
     }
 
     public UserDto update(UserDto userDto) {
-        User user = UserMapper.fromDto(userDto);
+        User user = userRepository.findById(userDto.getId());
 
-        if (userRepository.containsEmail(user.getEmail())) {
+        if (userRepository.containsEmail(userDto.getEmail())) {
             throw new IllegalArgumentException("email:" + user.getEmail() + " is already exists");
         }
-        if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
-            user.setEmail(getById(user.getId()).getEmail());
-        }
-        if (userDto.getName() == null || userDto.getName().isBlank()) {
-            user.setName(getById(user.getId()).getName());
-        }
-        return UserMapper.toDto(userRepository.update(user));
+        userMapper.updateUserFromDto(userDto, user);
+        return userMapper.toDto(user);
     }
 
     public void deleteById(Long id) {
