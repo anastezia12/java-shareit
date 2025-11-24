@@ -7,30 +7,27 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDateTime;
+
 @Data
 @EqualsAndHashCode(of = "id")
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "items", schema = "public")
-public class Item {
+@Table(name = "comments", schema = "public")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column
-    private String name;
-
+    private String text;
     @Column
-    private String description;
-
-    @Column(name = "is_available")
-    private Boolean available;
-
+    private LocalDateTime created;
     @ManyToOne
-    @JoinColumn(name = "owner_id")
-    private User owner;
+    @JoinColumn(name = "item_id")
+    private Item item;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private User author;
 
-    @Column(name = "request_id")
-    private Long request;
 }

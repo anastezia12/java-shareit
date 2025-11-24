@@ -3,7 +3,10 @@ package ru.practicum.shareit.item;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemRequestDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 
 import java.util.List;
 
@@ -16,25 +19,22 @@ public class ItemController {
     private ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> getAllFromUser(@RequestHeader(USER_Id_HEADER) Long userId) {
+    public List<ItemRequestDto> getAllFromUser(@RequestHeader(USER_Id_HEADER) Long userId) {
         return itemService.getAllFromUser(userId);
     }
 
     @GetMapping("/{id}")
-    public ItemDto findById(@PathVariable Long id) {
-        return itemService.findById(id);
+    public ItemResponseDto findById(@PathVariable Long id, @RequestHeader(USER_Id_HEADER) Long userId) {
+        return itemService.findById(id, userId);
     }
 
     @PostMapping
-    public ItemDto create(@RequestHeader(USER_Id_HEADER) Long userId,
-                          @RequestBody @Valid ItemDto itemDto) {
-        return itemService.create(userId, itemDto);
+    public ItemRequestDto create(@RequestHeader(USER_Id_HEADER) Long userId, @RequestBody @Valid ItemRequestDto itemRequestDto) {
+        return itemService.create(userId, itemRequestDto);
     }
 
     @PatchMapping("/{id}")
-    public ItemDto update(@RequestHeader(USER_Id_HEADER) Long userId,
-                          @PathVariable Long id,
-                          @RequestBody ItemDto dto) {
+    public ItemResponseDto update(@RequestHeader(USER_Id_HEADER) Long userId, @PathVariable Long id, @RequestBody ItemRequestDto dto) {
         return itemService.update(userId, dto, id);
     }
 
@@ -44,7 +44,12 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam("text") String text) {
+    public List<ItemRequestDto> search(@RequestParam("text") String text) {
         return itemService.search(text);
+    }
+
+    @PostMapping("/{id}/comment")
+    public CommentDto addComment(@PathVariable Long id, @RequestHeader(USER_Id_HEADER) Long userId, @RequestBody CommentCreateDto commentCreateDto) {
+        return itemService.addComment(id, userId, commentCreateDto);
     }
 }

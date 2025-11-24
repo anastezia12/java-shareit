@@ -1,9 +1,5 @@
 package ru.practicum.shareit.request;
 
-/**
- * TODO Sprint add-item-requests.
- */
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,9 +8,6 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @Data
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
@@ -22,6 +15,6 @@ import java.time.LocalDateTime;
 public class ItemRequest {
     private Long id;
     private String description;
-    private User requestor;
+    private User requester;
     private LocalDateTime created;
 }
