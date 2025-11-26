@@ -21,4 +21,6 @@ public interface ItemMapper {
     List<ItemRequestDto> toItemDtoList(List<Item> items);
 
     void updateItemFromDto(ItemRequestDto dto, @MappingTarget Item item);
+
+    List<ItemResponseDto> toItemResponseDtoList(List<Item> items);
 }

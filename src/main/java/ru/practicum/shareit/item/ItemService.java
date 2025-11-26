@@ -8,7 +8,7 @@ import ru.practicum.shareit.item.dto.ItemResponseDto;
 import java.util.List;
 
 public interface ItemService {
-    List<ItemRequestDto> getAllFromUser(Long id);
+    List<ItemResponseDto> getAllFromUser(Long id);
 
     ItemResponseDto findById(Long id, Long userId);
 

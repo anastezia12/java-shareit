@@ -19,7 +19,7 @@ public class ItemController {
     private ItemService itemService;
 
     @GetMapping
-    public List<ItemRequestDto> getAllFromUser(@RequestHeader(USER_Id_HEADER) Long userId) {
+    public List<ItemResponseDto> getAllFromUser(@RequestHeader(USER_Id_HEADER) Long userId) {
         return itemService.getAllFromUser(userId);
     }
 

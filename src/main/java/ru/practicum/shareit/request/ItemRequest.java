@@ -1,14 +1,12 @@
 package ru.practicum.shareit.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @AllArgsConstructor

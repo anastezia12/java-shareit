@@ -105,5 +105,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """)
     List<Booking> findByOwnerAndStatus(@Param("ownerId") Long ownerId, @Param("status") Status status);
 
-
+    @Query("""
+            SELECT COUNT(b) > 0 FROM Booking b
+            WHERE b.booker.id = :userId
+              AND b.item.id = :itemId
+              AND b.end < :now
+              AND b.status = 'APPROVED'
+            """)
+    boolean existsCompletedBooking(Long userId, Long itemId, LocalDateTime now);
 }

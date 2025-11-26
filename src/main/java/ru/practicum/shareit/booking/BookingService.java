@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
+import ru.practicum.shareit.booking.filterStrategy.*;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotAvailableException;
@@ -13,12 +14,13 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
 
+    private final Map<State, BookingFilterStrategy> strategies;
     @Autowired
     private BookingMapper bookingMapper;
     @Autowired
@@ -27,6 +29,24 @@ public class BookingService {
     private ItemRepository itemRepository;
     @Autowired
     private UserRepository userRepository;
+
+    public BookingService(
+            AllBookingStrategy all,
+            CurrentBookingStrategy current,
+            PastBookingStrategy past,
+            FutureBookingStrategy future,
+            WaitingBookingStrategy waiting,
+            RejectedBookingStrategy rejected
+    ) {
+        this.strategies = Map.of(
+                State.ALL, all,
+                State.CURRENT, current,
+                State.PAST, past,
+                State.FUTURE, future,
+                State.WAITING, waiting,
+                State.REJECTED, rejected
+        );
+    }
 
     public BookingDto save(BookingDtoRequest bookingDto, Long userId) {
         if (!itemRepository.existsById(bookingDto.getItemId())) {
@@ -53,8 +73,7 @@ public class BookingService {
     }
 
     public BookingDto changeStatus(Boolean approved, Long id, Long userId) {
-        Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("No such booking with id: " + id));
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new NotFoundException("No such booking with id: " + id));
 
         Long ownerId = booking.getItem().getOwner().getId();
 
@@ -86,79 +105,27 @@ public class BookingService {
         return bookingMapper.toDto(booking);
     }
 
-    public List<BookingDto> getBookingsFromUser(Long userId, String state) {
+    private BookingFilterStrategy getBookingFilterStrategy(State state) {
+        return strategies.get(state);
+    }
+
+    public List<BookingDto> getBookingsFromUser(Long userId, State state) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("No such user with id:" + userId);
         }
 
-        List<Booking> bookings;
-
-        LocalDateTime now = LocalDateTime.now();
-
-        switch (state.toUpperCase()) {
-            case "CURRENT":
-                bookings = bookingRepository
-                        .findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
-                                userId, now, now);
-                break;
-            case "PAST":
-                bookings = bookingRepository
-                        .findAllByBookerIdAndEndBeforeOrderByStartDesc(
-                                userId, now);
-                break;
-            case "FUTURE":
-                bookings = bookingRepository
-                        .findAllByBookerIdAndStartAfterOrderByStartDesc(
-                                userId, now);
-                break;
-            case "WAITING":
-                bookings = bookingRepository
-                        .findAllByBookerIdAndStatusOrderByStartDesc(
-                                userId, Status.WAITING);
-                break;
-            case "REJECTED":
-                bookings = bookingRepository
-                        .findAllByBookerIdAndStatusOrderByStartDesc(
-                                userId, Status.REJECTED);
-                break;
-            case "ALL":
-            default:
-                bookings = bookingRepository
-                        .findAllByBookerIdOrderByStartDesc(userId);
-                break;
-        }
-
-        return bookingMapper.toDtoList(bookings);
+        return bookingMapper.toDtoList(
+                getBookingFilterStrategy(state).getBookingsFromUser(userId)
+        );
     }
 
-    public List<BookingDto> getBookingsFromOwner(Long ownerId, String state) {
-        List<Booking> bookings;
-        LocalDateTime now = LocalDateTime.now();
-
-        switch (state.toUpperCase()) {
-            case "CURRENT":
-                bookings = bookingRepository.findCurrentByOwner(ownerId, now);
-                break;
-            case "PAST":
-                bookings = bookingRepository.findPastByOwner(ownerId, now);
-                break;
-            case "FUTURE":
-                bookings = bookingRepository.findFutureByOwner(ownerId, now);
-                break;
-            case "WAITING":
-                bookings = bookingRepository.findByOwnerAndStatus(ownerId, Status.WAITING);
-                break;
-            case "REJECTED":
-                bookings = bookingRepository.findByOwnerAndStatus(ownerId, Status.REJECTED);
-                break;
-            case "ALL":
-            default:
-                bookings = bookingRepository.findAllByItemOwner(ownerId);
-                break;
+    public List<BookingDto> getBookingsFromOwner(Long ownerId, State state) {
+        if (!userRepository.existsById(ownerId)) {
+            throw new NotFoundException("No such user with id:" + ownerId);
         }
 
-        return bookings.stream()
-                .map(bookingMapper::toDto)
-                .collect(Collectors.toList());
+        return bookingMapper.toDtoList(
+                getBookingFilterStrategy(state).getBookingsFromOwner(ownerId)
+        );
     }
 }

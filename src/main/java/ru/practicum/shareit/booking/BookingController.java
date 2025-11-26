@@ -4,12 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
+import ru.practicum.shareit.booking.filterStrategy.State;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-bookings.
- */
+
 @RestController
 @RequestMapping(path = "/bookings")
 public class BookingController {
@@ -34,12 +33,12 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> getAllByUserId(@RequestHeader(USER_Id_HEADER) Long userId, @RequestParam(name = "state", defaultValue = "ALL") String state) {
+    public List<BookingDto> getAllByUserId(@RequestHeader(USER_Id_HEADER) Long userId, @RequestParam(name = "state", defaultValue = "ALL") State state) {
         return bookingService.getBookingsFromUser(userId, state);
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getAllByOwnerId(@RequestHeader(USER_Id_HEADER) Long userId, @RequestParam(name = "state", defaultValue = "ALL") String state) {
-        return bookingService.getBookingsFromUser(userId, state);
+    public List<BookingDto> getAllByOwnerId(@RequestHeader(USER_Id_HEADER) Long userId, @RequestParam(name = "state", defaultValue = "ALL") State state) {
+        return bookingService.getBookingsFromOwner(userId, state);
     }
 }

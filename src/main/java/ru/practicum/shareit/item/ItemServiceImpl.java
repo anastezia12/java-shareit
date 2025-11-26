@@ -39,13 +39,22 @@ public class ItemServiceImpl implements ItemService {
     private BookingMapper bookingMapper;
 
     @Override
-    public List<ItemRequestDto> getAllFromUser(Long id) {
-        return itemMapper.toItemDtoList(itemRepository.findByOwnerId(id));
-
+    public List<ItemResponseDto> getAllFromUser(Long id) {
+        List<ItemResponseDto> items =
+                itemMapper.toItemResponseDtoList(itemRepository.findByOwnerId(id));
+        for (ItemResponseDto dto : items) {
+            addBookingsToItem(dto);
+            dto.setComments(
+                    commentMapper.toDtoList(
+                            commentRepository.getByItemId(dto.getId())
+                    )
+            );
+        }
+        return items;
     }
 
 
-    public ItemResponseDto addBookingsAndCommentsToItem(ItemResponseDto dto) {
+    public ItemResponseDto addBookingsToItem(ItemResponseDto dto) {
 
         dto.setLastBooking(bookingRepository.getLastBookingForItem(dto.getId(), LocalDateTime.now()).map(bookingMapper::toDto).orElse(null));
 
@@ -99,7 +108,7 @@ public class ItemServiceImpl implements ItemService {
 
         itemMapper.updateItemFromDto(itemRequestDto, item);
 
-        return addBookingsAndCommentsToItem(itemMapper.toItemResponseDto(itemRepository.save(item)));
+        return addBookingsToItem(itemMapper.toItemResponseDto(itemRepository.save(item)));
     }
 
 
@@ -123,8 +132,7 @@ public class ItemServiceImpl implements ItemService {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("No such user with id: " + userId));
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("No such item with id: " + itemId));
 
-        boolean hasCompletedBooking = !bookingRepository.findCompletedBookingsByUserAndItem(userId, itemId, LocalDateTime.now()).isEmpty();
-        if (!hasCompletedBooking) {
+        if (!bookingRepository.existsCompletedBooking(userId, itemId, LocalDateTime.now())) {
             throw new IllegalArgumentException("User must have completed a booking for this item before commenting");
         }
         Comment comment = new Comment();
