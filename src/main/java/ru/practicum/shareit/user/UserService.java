@@ -19,31 +19,26 @@ public class UserService {
     private UserMapper userMapper;
 
     public List<UserDto> getAll() {
-        return userMapper.toUserDtoList(userRepository.getAll());
-        //userRepository.getAll().stream().map(UserMapper::toDto).collect(Collectors.toList());
+        return userMapper.toUserDtoList(userRepository.findAll());
     }
 
     public UserDto getById(Long id) {
-        return userMapper.toDto(userRepository.findById(id));
-        //UserMapper.toDto(userRepository.findById(id));
+        return userMapper.toDto(userRepository.getReferenceById(id));
     }
 
     public UserDto add(UserDto userDto) {
         User user = userMapper.fromDto(userDto);
-//        if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
-//            throw new IllegalArgumentException("email can not be empty");
-//        }
-        if (userRepository.containsEmail(user.getEmail())) {
+        if (!userRepository.findByEmailContainingIgnoreCase(user.getEmail()).isEmpty()) {
             throw new IllegalArgumentException("email:" + user.getEmail() + " is already exists");
         }
 
-        return userMapper.toDto(userRepository.add(user));
+        return userMapper.toDto(userRepository.save(user));
     }
 
     public UserDto update(UserDto userDto) {
-        User user = userRepository.findById(userDto.getId());
+        User user = userRepository.getReferenceById(userDto.getId());
 
-        if (userRepository.containsEmail(userDto.getEmail())) {
+        if (!userRepository.findByEmailContainingIgnoreCase(userDto.getEmail()).isEmpty()) {
             throw new IllegalArgumentException("email:" + user.getEmail() + " is already exists");
         }
         userMapper.updateUserFromDto(userDto, user);
