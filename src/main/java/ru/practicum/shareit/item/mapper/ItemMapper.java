@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Item;
@@ -23,4 +24,8 @@ public interface ItemMapper {
     void updateItemFromDto(ItemRequestDto dto, @MappingTarget Item item);
 
     List<ItemResponseDto> toItemResponseDtoList(List<Item> items);
+
+    ItemForItemRequestDto toItemForItemRequestDto(Item item);
+
+    List<ItemForItemRequestDto> toItemForItemRequestDtoList(List<Item> item);
 }

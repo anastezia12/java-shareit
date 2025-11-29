@@ -4,17 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class ItemRequestDto {
+public class ItemRequestFullInfoDto {
     private Long id;
     private String description;
     private Long requesterId;
     private LocalDateTime created;
-
+    private List<ItemForItemRequestDto> items;
 }

@@ -15,6 +15,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -37,6 +38,8 @@ public class ItemServiceImpl implements ItemService {
     private CommentMapper commentMapper;
     @Autowired
     private BookingMapper bookingMapper;
+    @Autowired
+    private RequestRepository requestRepository;
 
     @Override
     public List<ItemResponseDto> getAllFromUser(Long id) {
@@ -85,15 +88,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemRequestDto create(Long userId, ItemRequestDto itemRequestDto) {
 
-        System.out.println("start creating ");
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("No such User with id: " + userId);
         }
-
         Item item = itemMapper.fromDto(itemRequestDto);
-        System.out.println("try  Item item = itemMapper.fromDto(itemDto);");
         item.setOwner(userRepository.getReferenceById(userId));
-        System.out.println("userRepository.getReferenceById(userId)");
+        if (itemRequestDto.getRequestId() != null) {
+            item.setRequest(requestRepository.getReferenceById(itemRequestDto.getRequestId()));
+        }
         return itemMapper.toItemDto(itemRepository.save(item));
     }
 
